@@ -1,0 +1,7 @@
+pandas
+scikit-learn
+flask
+dvc
+dvc-s3
+boto3
+numpy
