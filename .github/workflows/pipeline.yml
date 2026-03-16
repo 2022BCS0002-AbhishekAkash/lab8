@@ -53,8 +53,8 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/housing-ml:latest .
+        docker build -t 2022BCS0002_ABHISHEK_AKASH/housing-ml:latest .
 
     - name: Push Docker Image
       run: |
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/housing-ml:latest
+        docker push 2022BCS0002_ABHISHEK_AKASH/housing-ml:latest
