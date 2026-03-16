@@ -1,0 +1,66 @@
+name: ML Pipeline
+
+on: [push]
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
+
+    - name: Install dependencies
+      run: |
+        pip install dvc dvc-s3 pandas scikit-learn
+
+    - name: Configure AWS
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
+        aws configure set region us-east-1
+
+    - name: Pull dataset from DVC
+      run: dvc pull
+
+    - name: Train model
+      run: python src/train.py
+
+    - name: Upload metrics
+      uses: actions/upload-artifact@v3
+      with:
+        name: metrics
+        path: metrics/metrics.json
+
+    # -------------------------------
+    # Docker Login
+    # -------------------------------
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_ACCESSTOKEN }}
+
+    # -------------------------------
+    # Build Docker Image
+    # -------------------------------
+
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/housing-ml:latest .
+
+    # -------------------------------
+    # Push Docker Image
+    # -------------------------------
+
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/housing-ml:latest
