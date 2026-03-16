@@ -45,6 +45,16 @@ jobs:
         name: model-metrics
         path: metrics/metrics.json
 
+    - name: Result - 1 Summary
+      run: |
+        echo "## Result - 1 Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Name:** Abhishek Akash" >> $GITHUB_STEP_SUMMARY
+        echo "**Roll No:** 2022BCS0002" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Model Metrics" >> $GITHUB_STEP_SUMMARY
+        cat metrics/metrics.json >> $GITHUB_STEP_SUMMARY
+
     - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
