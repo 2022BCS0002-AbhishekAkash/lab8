@@ -1,6 +1,9 @@
 name: ML Pipeline
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   train:
@@ -8,35 +11,38 @@ jobs:
 
     steps:
 
-    - name: Checkout Repo
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    - name: Install Python
-      uses: actions/setup-python@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.10
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
-        pip install dvc dvc-s3 pandas scikit-learn
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: Configure AWS
+    - name: Configure AWS credentials
       run: |
         aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
-        aws configure set region us-east-1
+        aws configure set default.region us-east-1
 
     - name: Pull dataset from DVC
-      run: dvc pull
+      run: |
+        dvc pull
 
-    - name: Train model
-      run: python src/train.py
+    - name: Train Model
+      run: |
+        python src/train.py
 
-    - name: Upload metrics
+    - name: Upload metrics artifact
       uses: actions/upload-artifact@v4
       with:
-        name: metrics
+        name: model-metrics
         path: metrics/metrics.json
 
     - name: Login to DockerHub
